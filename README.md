@@ -9,11 +9,12 @@ A supervised machine-learning project using wearable-sensor data from the **Weig
 ## Repository contents
 
 - [`human_activity_recognition.Rmd`](human_activity_recognition.Rmd) — audited R Markdown workflow.
-- [`human_activity_recognition.html`](human_activity_recognition.html) — historical rendered course report; it may not reflect the current audited source.
 - [`archive/legacy_course_analysis.Rmd`](archive/legacy_course_analysis.Rmd) — original submission retained for provenance.
 - [`data/README.md`](data/README.md) — data-source and schema notes.
 - [`R-packages.txt`](R-packages.txt) — direct R dependencies.
 - [`docs/assignment_notes.md`](docs/assignment_notes.md) — original assignment notes.
+
+The previously committed rendered course HTML was removed from the current tree because it no longer represented the audited source. Historical versions remain available through Git history.
 
 ## Reproducibility improvements
 

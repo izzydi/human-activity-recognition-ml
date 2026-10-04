@@ -4,7 +4,7 @@ A supervised machine-learning project using wearable-sensor data from the **Weig
 
 ## Primary workflow
 
-[`human_activity_recognition.Rmd`](human_activity_recognition.Rmd) is the audited source. It downloads the public course data when needed, derives sparse/NZV feature removal from the labelled training file only, applies an identical predictor schema to the quiz/test file, uses a stratified hold-out split and trains a 500-tree Ranger Random Forest with cross-validation.
+[`human_activity_recognition.Rmd`](human_activity_recognition.Rmd) is the audited source. It downloads the public course data when needed, creates a stratified internal hold-out split **before** data-dependent feature filtering, learns sparse/NZV predictor removal from the training partition only, applies the resulting schema unchanged to held-out and quiz data, and trains a 500-tree Ranger Random Forest with cross-validation.
 
 ## Repository contents
 
@@ -17,7 +17,7 @@ A supervised machine-learning project using wearable-sensor data from the **Weig
 
 ## Reproducibility improvements
 
-The legacy workflow filtered training and quiz data independently and used position-based column removal. The audited workflow instead learns the predictor list once from training data and verifies that every selected predictor is available before scoring other datasets. It also replaces a very small Random Forest with a more stable 500-tree model and removes normality testing that is not an assumption of Random Forest classification.
+The legacy workflow filtered training and quiz data independently and used position-based column removal. The audited workflow instead creates the hold-out split first, learns missingness and near-zero-variance decisions only from the internal training partition, and verifies that every selected predictor exists before scoring held-out or quiz data. It also replaces a very small Random Forest with a more stable 500-tree model and removes normality testing that is not an assumption of Random Forest classification.
 
 ## Data
 

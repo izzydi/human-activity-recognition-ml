@@ -1,0 +1,165 @@
+---
+title: "Human Activity Recognition from Wearable Sensors"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(caret)
+library(ranger)
+library(ggplot2)
+library(dplyr)
+```
+
+## Data
+
+This project uses the Weight Lifting Exercise Dataset from the Practical Machine Learning course. Files are stored under `data/` and downloaded automatically if they are missing.
+
+```{r}
+set.seed(1821)
+
+data_dir <- "data"
+dir.create(data_dir, showWarnings = FALSE)
+
+training_path <- file.path(data_dir, "pml-training.csv")
+testing_path <- file.path(data_dir, "pml-testing.csv")
+
+training_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testing_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+if (!file.exists(training_path)) {
+  download.file(training_url, training_path, mode = "wb")
+}
+if (!file.exists(testing_path)) {
+  download.file(testing_url, testing_path, mode = "wb")
+}
+
+na_values <- c("NA", "#DIV/0!", "")
+raw_training <- read.csv(training_path, na.strings = na_values, check.names = FALSE)
+raw_testing <- read.csv(testing_path, na.strings = na_values, check.names = FALSE)
+
+stopifnot("classe" %in% names(raw_training))
+```
+
+## Training-derived feature selection
+
+Feature-selection decisions are learned from the labelled training dataset and then applied unchanged to the quiz/test dataset. This avoids independently filtering the two files into different schemas.
+
+```{r}
+metadata_columns <- c(
+  "X", "user_name", "raw_timestamp_part_1", "raw_timestamp_part_2",
+  "cvtd_timestamp", "new_window", "num_window", "problem_id"
+)
+
+candidate_predictors <- setdiff(names(raw_training), c("classe", metadata_columns))
+
+# Retain predictors that are not overwhelmingly missing in training data.
+missing_fraction <- vapply(
+  raw_training[candidate_predictors],
+  function(x) mean(is.na(x)),
+  numeric(1)
+)
+selected_predictors <- candidate_predictors[missing_fraction <= 0.95]
+
+# Remove near-zero-variance predictors using training data only.
+nzv <- nearZeroVar(raw_training[selected_predictors])
+if (length(nzv) > 0) {
+  selected_predictors <- selected_predictors[-nzv]
+}
+
+missing_in_quiz <- setdiff(selected_predictors, names(raw_testing))
+if (length(missing_in_quiz) > 0) {
+  stop(
+    "Quiz data are missing predictors selected from training data: ",
+    paste(missing_in_quiz, collapse = ", ")
+  )
+}
+
+model_data <- raw_training %>%
+  select(all_of(selected_predictors), classe) %>%
+  mutate(classe = factor(classe))
+
+quiz_data <- raw_testing %>%
+  select(all_of(selected_predictors))
+
+cat("Predictors retained:", length(selected_predictors), "\n")
+```
+
+## Hold-out evaluation
+
+A stratified hold-out split is created before model fitting. Cross-validation is performed only within the training partition.
+
+```{r}
+set.seed(1821)
+train_index <- createDataPartition(model_data$classe, p = 0.75, list = FALSE)
+train_data <- model_data[train_index, ]
+test_data <- model_data[-train_index, ]
+
+control <- trainControl(
+  method = "cv",
+  number = 5,
+  classProbs = TRUE,
+  savePredictions = "final"
+)
+
+set.seed(1821)
+rf_model <- train(
+  classe ~ .,
+  data = train_data,
+  method = "ranger",
+  trControl = control,
+  tuneLength = 5,
+  metric = "Accuracy",
+  num.trees = 500,
+  importance = "permutation"
+)
+
+rf_model
+```
+
+## Held-out performance
+
+```{r}
+holdout_predictions <- predict(rf_model, newdata = test_data)
+holdout_confusion <- confusionMatrix(holdout_predictions, test_data$classe)
+holdout_confusion
+```
+
+## Variable importance
+
+```{r}
+importance <- varImp(rf_model)
+plot(importance, top = 20, main = "Top predictor importance")
+```
+
+## Final model and quiz predictions
+
+After the hold-out result has been inspected, a final model is fitted on all labelled observations using the same predictor schema. This model is used only for the course quiz/test rows.
+
+```{r}
+set.seed(1821)
+final_model <- train(
+  classe ~ .,
+  data = model_data,
+  method = "ranger",
+  trControl = control,
+  tuneLength = 5,
+  metric = "Accuracy",
+  num.trees = 500,
+  importance = "permutation"
+)
+
+quiz_predictions <- predict(final_model, newdata = quiz_data)
+quiz_predictions
+```
+
+## Notes
+
+- The old exploratory course submission is retained under `archive/` for provenance.
+- The root HTML report is a historical render and may not reflect this audited source.
+- Normality testing is intentionally omitted because it is not an assumption of the Random Forest model used here.
+
+## Session information
+
+```{r}
+sessionInfo()
+```

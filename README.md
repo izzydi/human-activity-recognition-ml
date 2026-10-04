@@ -1,36 +1,34 @@
 # Human Activity Recognition with Machine Learning
 
-A supervised machine-learning project using wearable-sensor data from the **Weight Lifting Exercise Dataset**. The objective is to predict how a barbell exercise was performed (`classe`) from accelerometer measurements collected from the belt, forearm, arm and dumbbell.
+A supervised machine-learning project using wearable-sensor data from the **Weight Lifting Exercise Dataset** to predict exercise quality (`classe`).
 
-## Project overview
+## Primary workflow
 
-The analysis covers data cleaning, removal of sparse and near-zero-variance predictors, exploratory analysis, model training and evaluation. The source analysis is written in R Markdown and the rendered report is included for convenient review.
+[`human_activity_recognition.Rmd`](human_activity_recognition.Rmd) is the audited source. It downloads the public course data when needed, derives sparse/NZV feature removal from the labelled training file only, applies an identical predictor schema to the quiz/test file, uses a stratified hold-out split and trains a 500-tree Ranger Random Forest with cross-validation.
 
 ## Repository contents
 
-- [`human_activity_recognition.Rmd`](human_activity_recognition.Rmd) — complete R Markdown analysis.
-- [`human_activity_recognition.html`](human_activity_recognition.html) — rendered project report.
-- [`docs/assignment_notes.md`](docs/assignment_notes.md) — original assignment notes retained for provenance without cluttering the project root.
+- [`human_activity_recognition.Rmd`](human_activity_recognition.Rmd) — audited R Markdown workflow.
+- [`human_activity_recognition.html`](human_activity_recognition.html) — historical rendered course report; it may not reflect the current audited source.
+- [`archive/legacy_course_analysis.Rmd`](archive/legacy_course_analysis.Rmd) — original submission retained for provenance.
+- [`data/README.md`](data/README.md) — data-source and schema notes.
+- [`R-packages.txt`](R-packages.txt) — direct R dependencies.
+- [`docs/assignment_notes.md`](docs/assignment_notes.md) — original assignment notes.
 
-## Tools and methods
+## Reproducibility improvements
 
-The analysis uses R and packages including `dplyr`, `caret`, `ggplot2`, `gmodels` and `nortest`. It includes preprocessing, exploratory visualization and supervised classification of five exercise-quality classes.
+The legacy workflow filtered training and quiz data independently and used position-based column removal. The audited workflow instead learns the predictor list once from training data and verifies that every selected predictor is available before scoring other datasets. It also replaces a very small Random Forest with a more stable 500-tree model and removes normality testing that is not an assumption of Random Forest classification.
 
 ## Data
 
-The project uses the Weight Lifting Exercise Dataset originally supplied for the Coursera Practical Machine Learning course. The training and testing CSV files are referenced by the analysis but are not stored in this repository.
+The two public course CSV files are downloaded automatically into `data/` if missing. See [`data/README.md`](data/README.md).
 
 ## Run locally
 
-1. Download the training and testing data referenced in the R Markdown file.
-2. Place `pml-training.csv` and `pml-testing.csv` in the project directory.
-3. Open `human_activity_recognition.Rmd` in RStudio.
-4. Install any missing R packages and knit the document.
+1. Install the packages listed in [`R-packages.txt`](R-packages.txt).
+2. Open `human_activity_recognition.Rmd` in RStudio.
+3. Run or knit the document from top to bottom.
 
-## View the rendered report
+## Scope
 
-Download `human_activity_recognition.html` and open it in a browser for the complete rendered analysis.
-
-## Notes
-
-The original analytical work is preserved while the repository structure and naming have been cleaned for portfolio use.
+This is an educational human-activity-recognition project maintained as a reproducible machine-learning portfolio example.

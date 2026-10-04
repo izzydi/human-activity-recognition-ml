@@ -1,20 +1,20 @@
-# Practical Machine Learning — Human Activity Recognition
+# Human Activity Recognition with Machine Learning
 
-A course project that applies supervised machine learning to wearable-sensor data from the **Weight Lifting Exercise Dataset**. The objective is to predict how a barbell exercise was performed (`classe`) from accelerometer measurements collected from the belt, forearm, arm and dumbbell.
+A supervised machine-learning project using wearable-sensor data from the **Weight Lifting Exercise Dataset**. The objective is to predict how a barbell exercise was performed (`classe`) from accelerometer measurements collected from the belt, forearm, arm and dumbbell.
 
 ## Project overview
 
-The analysis covers data cleaning, removal of sparse and near-zero-variance predictors, exploratory analysis, model training and evaluation. The source analysis is written in R Markdown and the rendered report is included for convenient viewing.
+The analysis covers data cleaning, removal of sparse and near-zero-variance predictors, exploratory analysis, model training and evaluation. The source analysis is written in R Markdown and the rendered report is included for convenient review.
 
 ## Repository contents
 
-- [`CourseraMLproject.Rmd`](CourseraMLproject.Rmd) — complete R Markdown analysis.
-- [`CourseraMLproject.html`](CourseraMLproject.html) — rendered project report.
-- [`Project Details`](Project%20Details) — original assignment/project notes.
+- [`human_activity_recognition.Rmd`](human_activity_recognition.Rmd) — complete R Markdown analysis.
+- [`human_activity_recognition.html`](human_activity_recognition.html) — rendered project report.
+- [`assignment_notes.md`](assignment_notes.md) — original assignment notes retained for provenance.
 
 ## Tools and methods
 
-The analysis uses R and packages including `dplyr`, `caret`, `ggplot2`, `gmodels` and `nortest`. It includes preprocessing, exploratory visualization and supervised classification of the five exercise-quality classes.
+The analysis uses R and packages including `dplyr`, `caret`, `ggplot2`, `gmodels` and `nortest`. It includes preprocessing, exploratory visualization and supervised classification of five exercise-quality classes.
 
 ## Data
 
@@ -23,14 +23,14 @@ The project uses the Weight Lifting Exercise Dataset originally supplied for the
 ## Run locally
 
 1. Download the training and testing data referenced in the R Markdown file.
-2. Place `pml-training.csv` and `pml-testing.csv` in the working directory.
-3. Open `CourseraMLproject.Rmd` in RStudio.
+2. Place `pml-training.csv` and `pml-testing.csv` in the project directory.
+3. Open `human_activity_recognition.Rmd` in RStudio.
 4. Install any missing R packages and knit the document.
 
 ## View the rendered report
 
-GitHub stores the generated HTML report in this repository. For the best browser rendering, use an HTML preview service or download `CourseraMLproject.html` and open it locally.
+Download `human_activity_recognition.html` and open it in a browser for the complete rendered analysis.
 
 ## Notes
 
-This repository preserves the original course analysis while providing clearer documentation around its purpose, workflow and reproducibility requirements.
+The original analytical work is preserved while the repository structure and naming have been cleaned for portfolio use.

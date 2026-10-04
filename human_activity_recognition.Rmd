@@ -6,7 +6,6 @@ output: html_document
 ```{r setup, include=FALSE}
 library(caret)
 library(ranger)
-library(ggplot2)
 library(dplyr)
 ```
 
@@ -174,7 +173,6 @@ quiz_predictions
 ## Notes
 
 - The old exploratory course submission is retained under `archive/` for provenance.
-- The root HTML report is a historical render and may not reflect this audited source.
 - Normality testing is intentionally omitted because it is not an assumption of the Random Forest model used here.
 - The held-out performance estimate uses a feature schema learned without access to the held-out rows.
 

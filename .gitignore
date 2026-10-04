@@ -1,0 +1,8 @@
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+.DS_Store
+Thumbs.db
+pml-training.csv
+pml-testing.csv

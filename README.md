@@ -11,7 +11,8 @@ A supervised machine-learning project using wearable-sensor data from the **Weig
 - [`human_activity_recognition.Rmd`](human_activity_recognition.Rmd) — audited R Markdown workflow.
 - [`archive/legacy_course_analysis.Rmd`](archive/legacy_course_analysis.Rmd) — original submission retained for provenance.
 - [`data/README.md`](data/README.md) — data-source and schema notes.
-- [`R-packages.txt`](R-packages.txt) — direct R dependencies.
+- [`R-packages.txt`](R-packages.txt) — version-pinned direct R dependencies.
+- [`.github/workflows/r-ci.yml`](.github/workflows/r-ci.yml) — R 4.6.1 dependency and syntax CI.
 - [`docs/assignment_notes.md`](docs/assignment_notes.md) — original assignment notes.
 
 The previously committed rendered course HTML was removed from the current tree because it no longer represented the audited source. Historical versions remain available through Git history.
@@ -20,15 +21,26 @@ The previously committed rendered course HTML was removed from the current tree 
 
 The legacy workflow filtered training and quiz data independently and used position-based column removal. The audited workflow instead creates the hold-out split first, learns missingness and near-zero-variance decisions only from the internal training partition, and verifies that every selected predictor exists before scoring held-out or quiz data. It also replaces a very small Random Forest with a more stable 500-tree model and removes normality testing that is not an assumption of Random Forest classification.
 
+The direct R package versions are pinned in [`R-packages.txt`](R-packages.txt). GitHub Actions uses R 4.6.1 and `pak` to install those exact direct versions, then extracts and parses the canonical R Markdown source on every push and pull request.
+
 ## Data
 
 The two public course CSV files are downloaded automatically into `data/` if missing. See [`data/README.md`](data/README.md).
 
 ## Run locally
 
-1. Install the packages listed in [`R-packages.txt`](R-packages.txt).
-2. Open `human_activity_recognition.Rmd` in RStudio.
-3. Run or knit the document from top to bottom.
+1. Install R 4.6.1.
+2. Install `pak` and the pinned direct dependencies:
+
+```r
+install.packages("pak")
+pak::pkg_install(readLines("R-packages.txt"), upgrade = FALSE)
+```
+
+3. Open `human_activity_recognition.Rmd` in RStudio.
+4. Run or knit the document from top to bottom.
+
+`R-packages.txt` pins the direct dependencies; it is not a complete `renv.lock` for every recursive dependency.
 
 ## Scope
 

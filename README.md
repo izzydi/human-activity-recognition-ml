@@ -10,7 +10,7 @@ The analysis covers data cleaning, removal of sparse and near-zero-variance pred
 
 - [`human_activity_recognition.Rmd`](human_activity_recognition.Rmd) — complete R Markdown analysis.
 - [`human_activity_recognition.html`](human_activity_recognition.html) — rendered project report.
-- [`assignment_notes.md`](assignment_notes.md) — original assignment notes retained for provenance.
+- [`docs/assignment_notes.md`](docs/assignment_notes.md) — original assignment notes retained for provenance without cluttering the project root.
 
 ## Tools and methods
 

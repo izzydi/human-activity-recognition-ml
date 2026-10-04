@@ -40,9 +40,20 @@ raw_testing <- read.csv(testing_path, na.strings = na_values, check.names = FALS
 stopifnot("classe" %in% names(raw_training))
 ```
 
+## Stratified hold-out split
+
+The labelled data are split **before** any data-dependent feature filtering. All missingness and near-zero-variance decisions are learned from the internal training partition only, so the held-out partition cannot influence the predictor schema.
+
+```{r}
+set.seed(1821)
+train_index <- createDataPartition(raw_training$classe, p = 0.75, list = FALSE)
+train_raw <- raw_training[train_index, ]
+holdout_raw <- raw_training[-train_index, ]
+```
+
 ## Training-derived feature selection
 
-Feature-selection decisions are learned from the labelled training dataset and then applied unchanged to the quiz/test dataset. This avoids independently filtering the two files into different schemas.
+The predictor list is learned only from `train_raw`, then applied unchanged to the held-out partition and the course quiz/test file.
 
 ```{r}
 metadata_columns <- c(
@@ -50,23 +61,28 @@ metadata_columns <- c(
   "cvtd_timestamp", "new_window", "num_window", "problem_id"
 )
 
-candidate_predictors <- setdiff(names(raw_training), c("classe", metadata_columns))
+candidate_predictors <- setdiff(names(train_raw), c("classe", metadata_columns))
 
-# Retain predictors that are not overwhelmingly missing in training data.
 missing_fraction <- vapply(
-  raw_training[candidate_predictors],
+  train_raw[candidate_predictors],
   function(x) mean(is.na(x)),
   numeric(1)
 )
 selected_predictors <- candidate_predictors[missing_fraction <= 0.95]
 
-# Remove near-zero-variance predictors using training data only.
-nzv <- nearZeroVar(raw_training[selected_predictors])
+nzv <- nearZeroVar(train_raw[selected_predictors])
 if (length(nzv) > 0) {
   selected_predictors <- selected_predictors[-nzv]
 }
 
+missing_in_holdout <- setdiff(selected_predictors, names(holdout_raw))
 missing_in_quiz <- setdiff(selected_predictors, names(raw_testing))
+if (length(missing_in_holdout) > 0) {
+  stop(
+    "Held-out data are missing predictors selected from training data: ",
+    paste(missing_in_holdout, collapse = ", ")
+  )
+}
 if (length(missing_in_quiz) > 0) {
   stop(
     "Quiz data are missing predictors selected from training data: ",
@@ -74,9 +90,13 @@ if (length(missing_in_quiz) > 0) {
   )
 }
 
-model_data <- raw_training %>%
+train_data <- train_raw %>%
   select(all_of(selected_predictors), classe) %>%
   mutate(classe = factor(classe))
+
+holdout_data <- holdout_raw %>%
+  select(all_of(selected_predictors), classe) %>%
+  mutate(classe = factor(classe, levels = levels(train_data$classe)))
 
 quiz_data <- raw_testing %>%
   select(all_of(selected_predictors))
@@ -84,16 +104,11 @@ quiz_data <- raw_testing %>%
 cat("Predictors retained:", length(selected_predictors), "\n")
 ```
 
-## Hold-out evaluation
+## Model training
 
-A stratified hold-out split is created before model fitting. Cross-validation is performed only within the training partition.
+Cross-validation is performed only within the internal training partition.
 
 ```{r}
-set.seed(1821)
-train_index <- createDataPartition(model_data$classe, p = 0.75, list = FALSE)
-train_data <- model_data[train_index, ]
-test_data <- model_data[-train_index, ]
-
 control <- trainControl(
   method = "cv",
   number = 5,
@@ -119,8 +134,8 @@ rf_model
 ## Held-out performance
 
 ```{r}
-holdout_predictions <- predict(rf_model, newdata = test_data)
-holdout_confusion <- confusionMatrix(holdout_predictions, test_data$classe)
+holdout_predictions <- predict(rf_model, newdata = holdout_data)
+holdout_confusion <- confusionMatrix(holdout_predictions, holdout_data$classe)
 holdout_confusion
 ```
 
@@ -133,9 +148,13 @@ plot(importance, top = 20, main = "Top predictor importance")
 
 ## Final model and quiz predictions
 
-After the hold-out result has been inspected, a final model is fitted on all labelled observations using the same predictor schema. This model is used only for the course quiz/test rows.
+After the held-out result has been inspected, a final model is fitted on all labelled observations using the predictor schema learned without the hold-out set. This final model is used only for the separate course quiz/test rows.
 
 ```{r}
+model_data <- raw_training %>%
+  select(all_of(selected_predictors), classe) %>%
+  mutate(classe = factor(classe))
+
 set.seed(1821)
 final_model <- train(
   classe ~ .,
@@ -157,6 +176,7 @@ quiz_predictions
 - The old exploratory course submission is retained under `archive/` for provenance.
 - The root HTML report is a historical render and may not reflect this audited source.
 - Normality testing is intentionally omitted because it is not an assumption of the Random Forest model used here.
+- The held-out performance estimate uses a feature schema learned without access to the held-out rows.
 
 ## Session information
 

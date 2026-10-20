@@ -1,5 +1,7 @@
 # Human Activity Recognition with Machine Learning
 
+[![R CI](https://github.com/izzydi/human-activity-recognition-ml/actions/workflows/r-ci.yml/badge.svg)](https://github.com/izzydi/human-activity-recognition-ml/actions/workflows/r-ci.yml)
+
 A supervised machine-learning project using wearable-sensor data from the **Weight Lifting Exercise Dataset** to predict exercise quality (`classe`).
 
 ## Primary workflow
